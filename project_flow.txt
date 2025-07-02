@@ -106,7 +106,7 @@ dvc push --> this will get pushed to local_s3 unless we configure a remote S3
 
 28. Create new dir - flask_app | Inside that, add rest of the files and dir
 29. pip install flask and run the app (dvc push - to push data to S3)
-        - Tested with Fast API app also
+        - Testing with Fast API app ( to DO)
         - Model serving will happen from the model in production
 
 30. pip freeze > requirements.txt
