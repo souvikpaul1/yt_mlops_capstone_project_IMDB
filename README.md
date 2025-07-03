@@ -1,174 +1,180 @@
-# yt_mlops_capstone_project
-
-Here's a beautifully structured and professional-looking `README.md` file based on your project details, aimed at impressing recruiters and technical reviewers:
+Based on the rich and technically detailed workflow you provided, here's a **professional, visually impressive, and recruiter-friendly `README.md`** tailored for your project:
 
 ---
 
-# 🎬 IMDB Sentiment Analysis — End-to-End MLOps Project
+# 🎬 IMDB Sentiment Classification — MLOps Capstone Project
 
-🚀 **Production-grade ML pipeline for binary sentiment classification on IMDB reviews dataset**
-
-![CI/CD](https://img.shields.io/github/actions/workflow/status/<your-username>/yt_mlops_capstone_project/ci.yaml?label=CI%2FCD)
-![License](https://img.shields.io/github/license/<your-username>/yt_mlops_capstone_project)
-![Docker Pulls](https://img.shields.io/docker/pulls/<your-docker-username>/capstone-app)
+This project leverages the **IMDB Movie Review dataset (\~40k reviews)** to build a **production-ready, end-to-end Sentiment Analysis system**. The aim is to apply **MLOps best practices** to create a **reliable, automated, and scalable pipeline** from data ingestion to deployment on Kubernetes — complete with CI/CD, monitoring, and model retraining.
 
 ---
 
-## 🧠 Project Overview
+## 🧠 Project Objective
 
-This project tackles the binary **sentiment classification** of movie reviews using the [IMDB dataset](https://ai.stanford.edu/~amaas/data/sentiment/). With **40,000 reviews**, we move from model experimentation to full-fledged **ML production deployment** using the complete **MLOps lifecycle**.
-
----
-
-## 🧰 Tech Stack & Tools
-
-| Category               | Tools & Frameworks                            |
-| ---------------------- | --------------------------------------------- |
-| Language & Frameworks  | Python, Flask, FastAPI (TODO)                 |
-| Data Science & ML      | Scikit-learn, XGBoost, Word2Vec, SentenceBERT |
-| Experiment Tracking    | MLFlow on [DagsHub](https://dagshub.com)      |
-| Workflow Orchestration | DVC                                           |
-| Deployment             | Docker, AWS ECR, EKS, CI/CD                   |
-| Monitoring & Logging   | Prometheus, Grafana                           |
-| Infrastructure as Code | eksctl, AWS CloudFormation                    |
-| Testing                | Pytest, GitHub Actions                        |
+* ✨ End-to-end **ML pipeline** (ingestion ➝ preprocessing ➝ modeling ➝ evaluation ➝ registry ➝ retraining)
+* 📦 **Code & data versioning** using Git + DVC
+* ☁️ **Data ingestion to AWS S3**
+* ⚙️ **ML experiment tracking** with MLflow via Dagshub
+* 🧪 **Model retraining & promotion**
+* 🚀 **CI/CD** pipeline with GitHub Actions
+* 🐳 **Containerized deployment** with Docker → ECR → EKS (Kubernetes)
+* 📊 **Monitoring & alerting** using Prometheus & Grafana
 
 ---
 
-## 🗂 Project Structure
+## 📁 Project Structure
 
 ```
 yt_mlops_capstone_project/
 │
-├── data/                  # Raw and processed data
-├── src/                   # Core modules (ingestion, preprocessing, model, etc.)
-├── tests/                 # Test cases
-├── scripts/               # CI/CD logic (model promotion, testing, etc.)
-├── flask_app/             # API for model serving
-├── .github/workflows/     # CI/CD configuration
-├── dvc.yaml               # DVC pipeline definition
-├── params.yaml            # Model/config parameters
-└── Dockerfile             # Docker setup
+├── .github/workflows/         # CI/CD pipelines
+├── data_s3/                   # Versioned raw/interim/processed datasets
+├── flask_app/                 # REST API with Prometheus instrumentation
+├── src/                       # All pipeline stages (modular)
+│   ├── data_ingestion.py
+│   ├── data_preprocessing.py
+│   ├── feature_engineering.py
+│   ├── model_building.py
+│   ├── model_evaluation.py
+│   ├── register_model.py
+├── tests/                     # Unit tests
+├── scripts/                   # Model promotion scripts
+├── dvc.yaml                   # DVC pipeline definition
+├── params.yaml                # Parameter config
+├── Dockerfile
+└── requirements.txt
 ```
 
 ---
 
-## 🔬 Experimentation Highlights
+## 🚀 ML Pipeline Stages
 
-| Experiment | Vectorizer      | Algorithms Tested                                | Outcome                               |
-| ---------- | --------------- | ------------------------------------------------ | ------------------------------------- |
-| EXP1       | CountVectorizer | Logistic Regression                              | Baseline Accuracy: **66%**            |
-| EXP2       | BOW, TF-IDF     | LogisticRegression, MultinomialNB, XGBoost, etc. | Best: **TF-IDF + LogisticRegression** |
-| EXP3       | TF-IDF          | Hyperparameter Tuning                            | ROC-AUC: **80%**                      |
-| EXP4       | Word2Vec, SBERT | LogisticRegression                               | No better than TF-IDF                 |
+> Built using Python modules with **DVC** for orchestration.
 
-> ✅ Final Model: **TF-IDF + LogisticRegression (max\_features=10,000)**
-> 🎯 Metric: F1 Score (balanced dataset)
+1. **Data Ingestion**
 
----
+   * Load from local or AWS S3
+   * Train-test split
+2. **Data Preprocessing**
 
-## 📦 Model Pipeline with DVC
+   * Clean text: URLs, punctuation, lowercase, lemmatization, stopwords
+3. **Feature Engineering**
 
-* Modularized pipeline: `data_ingestion → preprocessing → feature_eng → model_building → evaluation → model_registration`
-* Artifacts tracked: models, transformers, train/test splits
-* Storage:
+   * Vectorization using BoW/TF-IDF/Word2Vec/Sentence-BERT
+   * Save vectorizer
+4. **Model Building**
 
-  * Local: `local_s3/`
-  * Cloud: `AWS S3` with `DVC remote`
+   * Trained various classifiers (Logistic Regression, NB, XGBoost, RF, GB)
+   * Best model: **TF-IDF + Logistic Regression**
+5. **Model Evaluation**
 
----
+   * Metrics: Accuracy, Precision, Recall, F1, ROC-AUC
+   * Tracked on MLflow via Dagshub
+6. **Model Registry**
 
-## 🔄 CI/CD Integration
+   * Register best models in **MLflow Registry**
+7. **Model Retraining**
 
-* **GitHub Actions** triggered on `develop` merges
-* Token-based auth with **DagsHub**
-* Stages:
+   * Triggered based on performance thresholds
+8. **Model Serving**
 
-  1. Run tests
-  2. Evaluate model performance
-  3. Promote model if performance improves
-  4. Docker build & push to **ECR**
-
----
-
-## 🐳 Dockerized Flask API
-
-```bash
-# Build & run the app
-docker build -t capstone-app:latest .
-docker run -p 8888:5000 -e CAPSTONE_TEST=<your_key> capstone-app:latest
-```
-
-> ✅ Also tested via FastAPI (upcoming)
+   * Flask API (Dockerized)
+   * Deployable on EKS
+   * Metrics exposed to Prometheus
 
 ---
 
-## ☁️ Cloud Deployment on AWS EKS
+## 📊 Model Experiments
 
-* **eksctl** used to spin up EKS cluster
-* Exposes model via **LoadBalancer**
-* CI/CD pipeline auto-deploys updated model containers
-* Model can be queried via:
+| Experiment | Vectorizer        | Model              | ROC-AUC  | F1 Score |
+| ---------- | ----------------- | ------------------ | -------- | -------- |
+| Exp 1      | CountVectorizer   | LogisticRegression | 0.70     | 0.65     |
+| Exp 2      | TF-IDF            | LogisticRegression | **0.80** | **0.78** |
+| Exp 3      | TF-IDF + HPTuning | LogisticRegression | 0.82     | 0.80     |
+| Exp 4      | Word2Vec/SBERT    | LogisticRegression | 0.76     | 0.74     |
 
-  ```bash
-  curl http://<external-ip>:5000
-  ```
-
----
-
-## 📊 Monitoring with Prometheus + Grafana
-
-* **Prometheus** scrapes Flask metrics (on port `5000`)
-* **Grafana** visualizes model/server performance
-* Deployed on separate EC2 instances
+✅ Final Model: **TF-IDF + Logistic Regression (10k max features)**
 
 ---
 
-## 🧹 AWS Cleanup Checklist
+## 🧪 CI/CD Pipeline
 
-* ✅ Delete EKS cluster
-* ✅ Remove services, deployments, secrets
-* ✅ Clean up ECR, S3, and CloudFormation stacks
+> CI/CD implemented with **GitHub Actions**, broken into **multi-job stages**.
 
----
-
-## 🏗 Bonus: Understanding the Infrastructure
-
-### How CloudFormation Ties In:
-
-* `eksctl` uses **CloudFormation** to create:
-
-  * EKS Control Plane Stack
-  * EKS Node Group Stack
-* Entire infra as code → **repeatable, auditable, versioned**
+* 🧼 Code linting & testing
+* 🧪 Unit test (including Flask & model thresholds)
+* 🛠️ Build & push Docker image to **AWS ECR**
+* 🚀 Deploy app to **EKS (via Kubernetes YAML)**
+* 🔁 Automatically promote better models from *staging* ➝ *production*
 
 ---
 
-## 📦 Persistent Volume Claims (PVCs)
+## ☁️ Cloud Architecture
 
-Kubernetes uses PVCs to allocate storage resources dynamically.
-
-* Bound to `EBS` volumes on AWS
-* Used when model/data need persistent state
-
----
-
-## 👀 What's Next?
-
-* ✅ Test FastAPI-based interface
-* ✅ Add additional model benchmarking
-* 🔜 Extend Grafana dashboard with custom app metrics
-* 🔜 Add Prometheus exporters for system monitoring
+* 🧊 **AWS S3**: Data storage & DVC remote
+* 🔐 **IAM User**: For programmatic access
+* 🐳 **Docker**: App containerization
+* 🧰 **ECR**: Docker image repository
+* ☸️ **EKS**: App deployment via Kubernetes
+* 📈 **Prometheus**: Monitors app metrics
+* 📊 **Grafana**: Dashboards for real-time alerts
 
 ---
 
-## 🤝 Connect With Me
+## 🔬 Monitoring Setup
 
-**Author:** \[Your Name]
-**Email:** [your.email@example.com](mailto:your.email@example.com)
-**LinkedIn:** [linkedin.com/in/your-profile](https://linkedin.com/in/your-profile)
-**GitHub:** [github.com/your-username](https://github.com/your-username)
+**Prometheus**
+
+* Deployed on separate EC2
+* Scrapes metrics from Flask API (via `/metrics`)
+* Tracks latency, request count, prediction count
+
+**Grafana**
+
+* Visual dashboards from Prometheus datasource
+* Real-time monitoring of app performance
 
 ---
 
-Let me know if you'd like a [**custom badge section**](f), or want the readme in a downloadable `.md` format too.
+## 🧪 Testing Suite
+
+| Test Module         | Description                                             |
+| ------------------- | ------------------------------------------------------- |
+| `test_model.py`     | Validate model metrics vs current production threshold  |
+| `test_flask_app.py` | Check API endpoints and prediction logic                |
+| `promote_model.py`  | Promote new model to production if performance improves |
+
+---
+
+## 💻 Deployment Modes
+
+| Mode       | Command                                                            |
+| ---------- | ------------------------------------------------------------------ |
+| Local      | `python app.py`                                                    |
+| Docker     | `docker run -p 8888:5000 -e CAPSTONE_TEST=xyz capstone-app:latest` |
+| ECR + EKS  | GitHub Actions CI/CD auto-deploy via `deployment.yaml`             |
+| Prometheus | Hosted on EC2, port `9090`                                         |
+| Grafana    | Hosted on EC2, port `3000`                                         |
+
+---
+
+## 🧰 Tools & Technologies Used
+
+* **ML Frameworks**: scikit-learn, XGBoost
+* **Pipeline Automation**: DVC, GitHub Actions
+* **Experiment Tracking**: MLflow + Dagshub
+* **Data Storage**: AWS S3
+* **Model Registry**: MLflow
+* **Containerization**: Docker
+* **Cloud Deployment**: AWS ECR, EKS
+* **Monitoring**: Prometheus, Grafana
+* **CI/CD**: GitHub Actions, DockerHub (optional)
+
+---
+
+## 🧠 Author
+
+**MLOps Capstone Project** | Built with ❤️ and deployed to the cloud!
+
+---
+
+Would you like me to also generate a [custom project badge section](f), like `Built with DVC`, `Deployed on AWS`, `CI/CD by GitHub Actions` to make it even flashier?

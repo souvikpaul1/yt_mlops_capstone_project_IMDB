@@ -15,5 +15,5 @@ EXPOSE 5000
 #local
 CMD ["python", "app.py"]  
 
-#Prod
+#Prod (used in EKS)
 #CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "app:app"]

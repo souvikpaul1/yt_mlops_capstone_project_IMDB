@@ -5,6 +5,19 @@ Dataset having almost 40000 reviews.
 
 Create a sentiment analysis Classification Model and Productionalize it.
 
+Project Objective:
+
+- Experiments
+- Code and Data Versioning
+- Data Ingestion to S3
+- Pipeline Build and Automation ( Data data_preprocessing --> feature_engineering --> model_building --> model_evaluation ---> model registry --> model Retraining)
+- Model registry
+- Model Retraining
+- CICD
+- Kubernetes deployment
+- Monitoring and Alerting
+
+
 -------------------------Setting up project structure---------------------------
 
 1. Create repo (yt_mlops_capstone_project), clone it in local
@@ -21,7 +34,7 @@ Create a sentiment analysis Classification Model and Productionalize it.
 10. Copy experiment tracking url and code snippet. (Also try: Go To MLFlow UI)
 11. pip install dagshub & mlflow
 
-12. Run the exp notebooks
+12. Run the exp notebooks and track it under MLFLOW UI of DagsHub
 
 EXP1: Count Vectorizer + Logistic Regression ( to get a baseline Model)
 
@@ -42,7 +55,7 @@ Algorithms:
 Best Model --> TF_IDF + Logistic Regression
 
 EXP3:
-Hyperparameter tuning TF_IDF + Logistic Regression
+ TF_IDF + Hyperparameter tuning of Logistic Regression
 
 EXP4:
 Vectorizers --> Word2vec and SentenceBERT
@@ -64,19 +77,44 @@ Added F1 score since it is a balance dataset
 #Day 22:
 
 17. Add code to below files/folders inside src dir:
-    - logger
+    - logger --> file handler and console handler
     - data_ingestion.py
+        - Load yaml file --> [train_test_split ratio]
+        - Load data --> load data from local/aws s3 
+        - Preprocess data --> split the dataset
+        - Save Data by creation a new folder data_s3/raw/train.csv, data_s3/raw/test.csv
+
     - data_preprocessing.py
+        - Remove - URLs,number,lowercase, punctuations,stopwords, lemmatization
+        - save Data by creation a new folder data_s3/interim/test_processed.csv, data_s3/interim/train_processed.csv
+
     - feature_engineering.py
+        - Apply BOW 
+        - Save the vectorizer as pickle file
+        - save data by creation of a new folder data_s3/processed/test_bow.csv, data_s3/processed/train_bow.csv
+
     - model_building.py
+        - Pick the data_s3/processed/train_bow.csv
+        - Train the data on the best model with the best HP tuning
+        - Save the model 
+
     - model_evaluation.py
+        - Load Model
+        - Load data_s3/processed/test_bow.csv
+        - Evaluate model on test data and save model metrics [accuracy, precision, recall and AUC]
+        - Save the metrics as reports/metrics.json
+        - Track the model/metrics via mlflow DagsHub by creating a new experiment.
+
     - register_model.py
+        - load model info
+        - register the model in mlflow to staging  stage in MLFLOW
+        
 
 18. add file - dvc.yaml (till model model_registration)
 19. add file - params.yaml
 20. Local Mode run: DVC pipeline is ready to run - dvc repro
 21. Once do - dvc status
-22. git add - commit - push
+22. git add - commit - push ( if not connected to S3, it will get pushed to local_s3)
 
 Source the data from S3
     - Csv file
@@ -101,37 +139,59 @@ both the s3 bucket can be same.
 
 dvc status
 dvc commit
-dvc push --> this will get pushed to local_s3 unless we configure a remote S3 
+dvc push --> this(md5#) will get pushed to local_s3 unless we configure a remote S3 
+The pipeline is completely automated using DVC
 
+Day 23:
 
-28. Create new dir - flask_app | Inside that, add rest of the files and dir
+28. Create new dir - flask_app | Inside that, add rest of the files and dir like app.py
 29. pip install flask and run the app (dvc push - to push data to S3)
         - Testing with Fast API app ( to DO)
         - Model serving will happen from the model in production
 
+    Prometheus task performed in app.py:
+        - Request Count
+        - Request Latency
+        - Prediction Count
+
+    Plot these using Grafana
+    Get the latest Model Version under staging of MLflow --> this is <model serving>
+    Home route will render index.html
+
+
 30. pip freeze > requirements.txt
 31. Add .github/workflows/ci.yaml file
-        - break the ci.yaml into multiple Jobs.
+        - break the ci.yaml into multiple Jobs.(done)
         - ci.yaml with only execute when merged to develop/branch
         
 
 32. Create key token on Dagshub for auth: Go to dagshub repo > Your settings > Tokens > Generate new token
-    >> Please make sure to save token << >> capstone_test: << >>
-    >> Add this auth token to github secret&var and update on ci file
+    >> Please make sure to save token << >> capstone_test: << >> 
+    >> Add this auth token to github secret&var and update on ci file, else authorization required msg will appear
 
 
 31. Add dir "tests"&"scripts" and files within. This will contain our test related scripts for CI.
     test:
-        - test_model.py ( test model if it is crossing previous model)
+        - test_model.py ( test model performance if it is crossing previous(production) model performance threshold)
     Scripts:
-        - Promote_model.py ( this will promote staging model to production in model registry if it betters the previous model)
+        - Promote_model.py ( this will promote staging model to production in model registry if it betters the previous model, the previous model will be archived)
     test:
-        - test_flask_app.py ( test the flask app that it should serve the new model)
+        - test_flask_app.py ( - test the flask app if the page is getting loaded properly 
+                              - Hard code a sentiment and the model prediction should be either Positive or Negative )
+
+Note: While doing model serving, it should take the model which is in production and not in staging.
+
+Day 24:
 
 >>>>> Moving to Docker <<<<<
 32. pip install pipreqs
 33. cd flask_app & do "pipreqs . --force"
 34. Add dockerfile and start docker-desktop in background
+        - copy flash_app to app
+        - copy model/vectorizer.pkl
+        - pip install the requirements.txt
+        - expose 5000 port
+        - python app.py
     Also before proceeding make sure: [switch the mlflow server setup to param version, change cmd on dockerfile]
 35. go to root dir and: "docker build -t capstone-app:latest ."
 36. Try running the image: "docker run -p 8888:5000 capstone-app:latest"
@@ -140,6 +200,14 @@ dvc push --> this will get pushed to local_s3 unless we configure a remote S3
     - docker push youruser/capstone-app:latest (optional)
     - optional: try to delete image locally and pull it from dockerhub and run (optional)
 
+This app contains the model serving:
+
+1. app runs locally --> python app.py
+2. app running via docker --> docker run -p 8888:5000 capstone-app:latest (can be run via docker desktop)
+3. app pushed to ECR 
+4. app in ECR running on EKS --> [deployment.yaml, service.yaml]
+
+
 37. Setup aws services for below secrets and variables:
 	AWS_ACCESS_KEY_ID
 	AWS_SECRET_ACCESS_KEY
@@ -147,6 +215,8 @@ dvc push --> this will get pushed to local_s3 unless we configure a remote S3
 	ECR_REPOSITORY (capstone-proj)
     AWS_ACCOUNT_ID
    (Also add this permission to the IAM user: AmazonEC2ContainerRegistryFullAccess)
+
+Add these in github secrets
 
 38. Execute CICD pipeline till the stage where we build and push image to ECR.
 
@@ -184,6 +254,8 @@ If the path points to your Anaconda environment (e.g., C:\Users\Personal\anacond
 39. Create an EKS cluster:
     eksctl create cluster --name flask-app-cluster --region us-east-1 --nodegroup-name flask-app-nodes --node-type t3.small --nodes 1 --nodes-min 1 --nodes-max 1 --managed
 
+nodegroup-name is a EC2 instance, we also mention how mancy EC2 we need.
+
 40. Update kubectl Config(Once the cluster is created, eksctl will automatically update your kubectl config file. However, you can verify and set it manually using:)
 aws eks --region us-east-1 update-kubeconfig --name flask-app-cluster (This ensures your kubectl is pointing to the correct cluster.)
 
@@ -214,6 +286,9 @@ kubectl get svc
   >> edit ci.yaml, deployment.yaml, dockerfile
   >> Also edit the security group for nodes and edit inbound rule for 5000 port
 
+Checkout CloudFormation:
+    - EKS cluster stack
+    - Nodes(EC2) stack
 
 48. Once the LoadBalancer service is up, get the external IP:
 kubectl get svc flask-app-service
@@ -252,7 +327,7 @@ scrape_configs:
     static_configs:
       - targets: ["a6bf6255d5f61470c9782b8955c98271-1409247973.us-east-1.elb.amazonaws.com:5000"]  # Replace with your app's External IP
 
-
+Prometheus will go to this external IP location and will search in metrics. We dont need to mention /metrics 
 
 >> Save the File: ctrl+o -> enter -> ctrl+x
 >> Verify the Changes: cat /etc/prometheus/prometheus.yml
@@ -263,6 +338,8 @@ This should return the full path to the prometheus binary, such as /usr/local/bi
 
 57. Run Prometheus with the config file:
 /usr/local/bin/prometheus --config.file=/etc/prometheus/prometheus.yml
+
+In the prometheus Ec2, take the public IP address, give access to the security group 9090 and paste the <public-ip>:9090 --> prometheus will open
 
 
 >>>>>>>>>> Grafana Server Setup <<<<<<<<<<
@@ -291,7 +368,7 @@ sudo apt update && sudo apt upgrade -y
 67. Add Prometheus as a Data Source: http://54.81.71.206/:9090
     click - Save and Test | Get started with building dashboards.
 
-
+Since Grafana and prometheus are created on separate EC2 and not inside EKS, we have to explicitly give permission via the security group
 
 ----------------------------------------------------------------------------------
 
