@@ -1,4 +1,3 @@
-Based on the rich and technically detailed workflow you provided, here's a **professional, visually impressive, and recruiter-friendly `README.md`** tailored for your project:
 
 ---
 
@@ -170,11 +169,3 @@ yt_mlops_capstone_project/
 * **CI/CD**: GitHub Actions, DockerHub (optional)
 
 ---
-
-## 🧠 Author
-
-**MLOps Capstone Project** | Built with ❤️ and deployed to the cloud!
-
----
-
-Would you like me to also generate a [custom project badge section](f), like `Built with DVC`, `Deployed on AWS`, `CI/CD by GitHub Actions` to make it even flashier?
