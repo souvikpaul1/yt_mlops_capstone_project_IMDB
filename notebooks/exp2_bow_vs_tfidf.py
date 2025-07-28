@@ -91,16 +91,6 @@ VECTORIZERS = {
     'TF-IDF': TfidfVectorizer()
 }
 
-
-#Word2Vec
-#GloVe
-#FastText
-#BERT
-#Sentence-BERT
-
-
-
-
 ALGORITHMS = {
     'LogisticRegression': LogisticRegression(),
     'MultinomialNB': MultinomialNB(),
