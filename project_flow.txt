@@ -16,7 +16,7 @@ Project Objective:
 - CICD
 - Kubernetes deployment
 - Monitoring and Alerting
-
+.
 
 -------------------------Setting up project structure---------------------------
 
