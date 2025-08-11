@@ -201,7 +201,7 @@ Day 24:
     - optional: try to delete image locally and pull it from dockerhub and run (optional)
 
 This app contains the model serving:
-..
+
 1. app runs locally --> python app.py
 2. app running via docker --> docker run -p 8888:5000 capstone-app:latest (can be run via docker desktop)
 3. app pushed to ECR 
